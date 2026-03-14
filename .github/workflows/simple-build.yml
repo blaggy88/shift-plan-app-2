@@ -1,0 +1,38 @@
+name: Simple APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'  # Ältere, stabilere Version
+        channel: 'stable'
+        
+    - name: Install dependencies
+      run: |
+        flutter pub get
+        # Versuche ohne build_runner zuerst
+        # flutter pub run build_runner build --delete-conflicting-outputs || true
+        
+    - name: Build Debug APK (einfacher)
+      run: |
+        flutter build apk --debug
+        echo "✅ Debug APK gebaut!"
+        ls -la build/app/outputs/flutter-apk/
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: shift-plan-app-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
